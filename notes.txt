@@ -1,0 +1,109 @@
+SPECTRA
+
+PHYSICSCLASSROOM- https://www.physicsclassroom.com/
+
+PHYSICS
+
+1-D Kinetics-- https://www.physicsclassroom.com/Physics-Tutorial/1-D-Kinematics
+Newton’s laws-- https://www.physicsclassroom.com/Physics-Tutorial/Newton-s-Laws
+Vectors - Motion and Forces-- https://www.physicsclassroom.com/class/vectors
+Momentum and Its Conservation—https://www.physicsclassroom.com/class/momentum
+Circular Motion and Satellite Motion—https://www.physicsclassroom.com/class/circles
+Work, Energy and Power—https://www.physicsclassroom.com/class/energy
+Balance and Rotation--https://www.physicsclassroom.com/class/Balance-and-Rotation
+Fluids-- https://www.physicsclassroom.com/class/Fluids
+Thermal Physics-- https://www.physicsclassroom.com/class/thermalP
+Static Electricity--https://www.physicsclassroom.com/class/estatics
+Electric Circuits--https://www.physicsclassroom.com/class/circuits
+Magnetic Fields and Electromagnetism--https://www.physicsclassroom.com/class/Magnetic-Fields-and-Electromagnetism
+Electromagnetic Induction--https://www.physicsclassroom.com/class/Electromagnetic-Induction
+Vibrations and Waves--https://www.physicsclassroom.com/class/waves
+Sound Waves and Music--https://www.physicsclassroom.com/class/sound
+Light waves and Color--https://www.physicsclassroom.com/class/light
+Reflection and Ray Model of Light--https://www.physicsclassroom.com/class/refln
+Refraction and Ray model of Light--https://www.physicsclassroom.com/class/refrn
+
+
+
+
+
+
+CHEMISTRY
+
+Measurements and Calculations in Chemistry—https://www.physicsclassroom.com/Chemistry-Tutorial/Measurement-and-Units
+Matter-- https://www.physicsclassroom.com/Chemistry-Tutorial/Matter
+Elements, Atoms, and Ions-- https://www.physicsclassroom.com/Chemistry-Tutorial/Elements-Atoms-Ions
+Compounds, Names, and Formulae-- https://www.physicsclassroom.com/Chemistry-Tutorial/Compounds-Formulas-Names
+The Modern Model of the Atom-- https://www.physicsclassroom.com/Chemistry-Tutorial/Modern-Atomic-Model
+Chemical Bonds and Molecular Shape-- https://www.physicsclassroom.com/Chemistry-Tutorial/Chemical-Bonding-and-Molecular-Geometry
+The Mole and Its Applications-- https://www.physicsclassroom.com/Chemistry-Tutorial/Mole-and-Applications
+Chemical Reactions-- https://www.physicsclassroom.com/Chemistry-Tutorial/Chemical-Reactions
+Stoichiometry-- https://www.physicsclassroom.com/Chemistry-Tutorial/Stoichiometry
+Gases and Gas Laws-- https://www.physicsclassroom.com/Chemistry-Tutorial/Gases-and-Gas-Laws
+Solids, Liquids, and Intermolecular Forces-- https://www.physicsclassroom.com/Chemistry-Tutorial/Solids-Liquids-and-Intermolecular-Forces
+Thermochemistry-- https://www.physicsclassroom.com/Chemistry-Tutorial/Thermochemistry
+Solutions-- https://www.physicsclassroom.com/Chemistry-Tutorial/Solutions
+ Kinetics and Equilibrium-- https://www.physicsclassroom.com/Chemistry-Tutorial/Kinetics-and-Equilibrium
+Acids and Bases-- https://www.physicsclassroom.com/Chemistry-Tutorial/Acids-and-Bases
+Solutions Equilibria— https://www.physicsclassroom.com/Chemistry-Tutorial/Solution-Equilibria
+Chemical Thermodynamics— https://www.physicsclassroom.com/Chemistry-Tutorial/Chemical-Thermodynamics
+Electrochemistry— https://www.physicsclassroom.com/Chemistry-Tutorial/Electrochemistry
+Nuclear Chemistry and Radiation--  https://www.physicsclassroom.com/Chemistry-Tutorial/Nuclear-Chemistry
+
+
+
+http://www.pinterest.com/physxclassroom
+http://twitter.com/Allthingsphysix
+http://www.facebook.com/ThePhysicsClassroom
+https://www.youtube.com/physicsclassroomLIVE
+
+
+WHATS NEW-- https://www.physicsclassroom.com/Recent-Additions
+PRODUCT AND PLANS-- https://www.physicsclassroom.com/Store
+TASK TRACKER-- https://www.physicsclassroom.com/Account
+VIDEO TUTORIAL-- https://www.physicsclassroom.com/Physics-Video-Tutorial
+STUDENT AIDS-- https://www.physicsclassroom.com/Student-Aids
+INTERACTIVES-- https://www.physicsclassroom.com/Physics-Interactives
+CONCEPT BUILDERS-- https://www.physicsclassroom.com/Concept-Builders
+MINDS ON-- https://www.physicsclassroom.com/mop
+CALC PAD--https://www.physicsclassroom.com/calcpad
+SCIENCE REASONING--https://www.physicsclassroom.com/Science-Reasoning
+TEACHER AIDS--https://www.physicsclassroom.com/Teacher-Aids
+LESSON PLANS--https://www.physicsclassroom.com/lesson-plans
+LESSON PLANS-- https://www.physicsclassroom.com/curriculum
+CURRICULUM CORNER--https://www.physicsclassroom.com/curriculum
+THE LABORATORY--https://www.physicsclassroom.com/lab
+OTHER AIDS--https://www.physicsclassroom.com/Other-Aids
+Accessibility--https://www.physicsclassroom.com/accessibility
+
+
+
+
+
+
+
+Name: SPECTRA
+Description
+Welcome to Spectra — the AI-powered learning assistant for The Physics Classroom. Designed for students in grades 9–12, Spectra helps you explore Phyhttps://media.geeksforgeeks.org/wp-content/uploads/20240627145300/GFG7.webpsics and Chemistry concepts through interactive, accurate, and easy-to-understand explanations. Using intelligent Retrieval-Augmented Generation (RAG) technology, Spectra retrieves information from trusted tutorials, notes, videos, interactives, and educational resources to provide contextual answers and effective learning support. Whether you need help understanding formulas, revising topics, clarifying doubts, or preparing for exams, Spectra acts like a smart study companion by simplifying complex ideas, guiding step-by-step learning, and encouraging stronger conceptual understanding in a student-friendly and engaging manner.
+
+Introduction
+Hi! I’m Spectra, your AI learning companion for Physics and Chemistry on The Physics Classroom. I’m here to help you understand concepts, solve doubts, revise topics, and prepare for exams with simple, accurate, and interactive explanations. Ask me anything related to your lessons, formulas, or concepts, and I’ll guide you step-by-step in an easy-to-understand way.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
