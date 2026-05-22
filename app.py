@@ -4,6 +4,7 @@ import faiss
 import tempfile
 import re
 import os
+import pickle
 
 from gtts import gTTS
 from groq import Groq
@@ -16,68 +17,73 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 AudioSegment.converter = which("ffmpeg")
-AudioSegment.ffprobe   = which("ffprobe")# -----------------------------
+AudioSegment.ffprobe = which("ffprobe")
+
+# -----------------------------
 # PAGE CONFIG
 # -----------------------------
-
 st.set_page_config(
-    page_title="AI Physics Tutor",
+    page_title="SPECTRA Physics Tutor",
     page_icon="🧠",
-    layout="centered"
+    layout="wide"
 )
 
 # -----------------------------
-# TITLE
+# UI STYLE
 # -----------------------------
+st.markdown("""
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
 
-st.title("🧠 AI Physics Tutor")
-st.write("Ask questions using text or voice")
+.stApp {
+    background-color: #0f1117;
+    color: white;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # -----------------------------
-# CHAT HISTORY
+# SESSION STATE
 # -----------------------------
-
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
+if "last_voice" not in st.session_state:
+    st.session_state.last_voice = None
 
 # -----------------------------
-# LOAD CLEAN NOTES
+# LOAD NOTES
 # -----------------------------
-
 with open("clean_notes.txt", "r", encoding="utf-8") as f:
     text = f.read()
-
-# -----------------------------
-# CLEAN TEXT
-# -----------------------------
 
 text = re.sub(r"\s+", " ", text)
 
 # -----------------------------
-# CHUNKING
+# IMPROVED CHUNKING
 # -----------------------------
-
-def chunk_text(text, size=500):
-
+def chunk_text(text, size=800, overlap=120):
     chunks = []
+    start = 0
 
-    for i in range(0, len(text), size):
-
-        chunk = text[i:i + size]
+    while start < len(text):
+        end = start + size
+        chunk = text[start:end]
 
         if len(chunk.strip()) > 50:
             chunks.append(chunk)
+
+        start += size - overlap
 
     return chunks
 
 chunks = chunk_text(text)
 
 # -----------------------------
-# LOAD EMBEDDING MODEL
+# MODEL
 # -----------------------------
-
 @st.cache_resource
 def load_model():
     return SentenceTransformer("all-MiniLM-L6-v2")
@@ -85,168 +91,165 @@ def load_model():
 model = load_model()
 
 # -----------------------------
-# CREATE EMBEDDINGS
+# EMBEDDINGS (FIXED - NORMALIZED)
 # -----------------------------
-
 @st.cache_resource
 def create_embeddings(chunks):
+    emb = model.encode(chunks)
+    emb = np.array(emb).astype("float32")
 
-    embeddings = model.encode(chunks)
+    # IMPORTANT FIX
+    faiss.normalize_L2(emb)
 
-    embeddings = np.array(embeddings).astype("float32")
-
-    return embeddings
+    return emb
 
 embeddings = create_embeddings(chunks)
 
 # -----------------------------
-# CREATE FAISS INDEX
+# FAISS INDEX (COSINE SIMILARITY FIX)
 # -----------------------------
-
 @st.cache_resource
-def create_index(embeddings):
+def build_index(embeddings):
+    dim = embeddings.shape[1]
 
-    dimension = embeddings.shape[1]
-
-    index = faiss.IndexFlatL2(dimension)
-
+    index = faiss.IndexFlatIP(dim)  # cosine similarity
     index.add(embeddings)
 
     return index
 
-index = create_index(embeddings)
+index = build_index(embeddings)
 
 # -----------------------------
-# RETRIEVE CONTEXT
+# RETRIEVAL (FIXED - NO REPETITION)
 # -----------------------------
-
 def retrieve_context(question, k=3):
 
-    q_embedding = model.encode([question])
+    q_emb = model.encode([question])
+    q_emb = np.array(q_emb).astype("float32")
 
-    q_embedding = np.array(q_embedding).astype("float32")
+    faiss.normalize_L2(q_emb)
 
-    distances, indices = index.search(q_embedding, k)
+    distances, indices = index.search(q_emb, k * 5)
 
-    retrieved_chunks = []
+    results = []
+    seen = set()
 
-    for i in indices[0]:
+    for i, idx in enumerate(indices[0]):
 
-        chunk = chunks[i]
+        if idx >= len(chunks):
+            continue
 
-        if len(chunk.strip()) > 40:
-            retrieved_chunks.append(chunk)
+        chunk = chunks[idx]
 
-    return "\n".join(retrieved_chunks)
+        # avoid duplicates
+        if chunk in seen:
+            continue
 
-# -----------------------------
-# GROQ CLIENT
-# -----------------------------
+        seen.add(chunk)
+        results.append(chunk)
 
-client = Groq(
-    api_key=os.getenv("GROQ_API_KEY")
-)
+        if len(results) == k:
+            break
 
-# -----------------------------
-# VOICE INPUT
-# -----------------------------
-
-# -----------------------------
-# VOICE INPUT
-# -----------------------------
-
-st.subheader("🎤 Voice Input")
-
-audio = mic_recorder(
-    start_prompt="Start Recording",
-    stop_prompt="Stop Recording",
-    key="recorder"
-)
-
-voice_text = ""
-
-if audio:
-
-    try:
-
-        # SAVE AUDIO AS WEBM
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as temp_audio:
-
-            temp_audio.write(audio["bytes"])
-
-            temp_audio_path = temp_audio.name
-
-        # CONVERT WEBM TO WAV
-        sound = AudioSegment.from_file(
-            temp_audio_path,
-            format="webm"
-        )
-
-        wav_path = temp_audio_path.replace(".webm", ".wav")
-
-        sound.export(
-            wav_path,
-            format="wav"
-        )
-
-        # SPEECH RECOGNITION
-        recognizer = sr.Recognizer()
-
-        with sr.AudioFile(wav_path) as source:
-
-            audio_data = recognizer.record(source)
-
-            voice_text = recognizer.recognize_google(audio_data)
-
-            st.success(f"You said: {voice_text}")
-
-    except Exception as e:
-
-        st.error(f"Audio error: {e}")
+    return "\n".join(results)
 
 # -----------------------------
-# TEXT INPUT
+# GROQ API
 # -----------------------------
-
-user_input = st.chat_input("Ask your physics question...")
-
-# -----------------------------
-# PRIORITIZE VOICE INPUT
-# -----------------------------
-
-if voice_text:
-    user_input = voice_text
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # -----------------------------
-# MAIN CHAT LOGIC
+# LAYOUT
 # -----------------------------
+left, center, right = st.columns([1, 3, 1])
 
-if user_input:
+# -----------------------------
+# LEFT (AVATAR)
+# -----------------------------
+with left:
+    st.image("https://cdn-icons-png.flaticon.com/512/4712/4712109.png", width=120)
+    st.markdown("### 🧠 SPECTRA AI")
+    st.caption("Physics Tutor")
 
-    # USER MESSAGE
-    st.chat_message("user").markdown(user_input)
+# -----------------------------
+# RIGHT (TOOLS)
+# -----------------------------
+with right:
+    st.markdown("### ⚙️ Tools")
 
-    st.session_state.chat_history.append(
-        ("user", user_input)
+    if st.button("🗑 Clear Chat"):
+        st.session_state.chat_history = []
+        st.rerun()
+
+# -----------------------------
+# CENTER (MAIN CHAT)
+# -----------------------------
+with center:
+
+    st.title("🧠 SPECTRA Physics Tutor")
+    st.write("Ask questions using text or voice")
+
+    # -------------------------
+    # VOICE INPUT
+    # -------------------------
+    st.subheader("🎤 Voice Input")
+
+    audio = mic_recorder(
+        start_prompt="Start Recording",
+        stop_prompt="Stop Recording",
+        key="recorder"
     )
 
-    # RETRIEVE CONTEXT
-    context = retrieve_context(user_input)
+    voice_text = None
 
-    # PROMPT
-    prompt = f"""
-You are a STRICT Physics tutor AI.
+    if audio:
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as temp_audio:
+                temp_audio.write(audio["bytes"])
+                temp_audio_path = temp_audio.name
+
+            sound = AudioSegment.from_file(temp_audio_path, format="webm")
+            wav_path = temp_audio_path.replace(".webm", ".wav")
+            sound.export(wav_path, format="wav")
+
+            recognizer = sr.Recognizer()
+
+            with sr.AudioFile(wav_path) as source:
+                audio_data = recognizer.record(source)
+                voice_text = recognizer.recognize_google(audio_data)
+
+                st.success(f"You said: {voice_text}")
+                st.session_state.last_voice = voice_text
+
+        except Exception as e:
+            st.error(f"Audio error: {e}")
+
+    # -------------------------
+    # TEXT INPUT
+    # -------------------------
+    user_input = st.chat_input("💬 Ask your physics question...")
+
+    if voice_text is not None:
+        user_input = voice_text
+
+    # -------------------------
+    # CHAT LOGIC
+    # -------------------------
+    if user_input:
+
+        st.chat_message("user").markdown(user_input)
+        st.session_state.chat_history.append(("user", user_input))
+
+        context = retrieve_context(user_input)
+
+        prompt = f"""
+You are a strict Physics tutor AI.
 
 RULES:
-- Answer ONLY from the provided context.
-- DO NOT use outside knowledge.
-- DO NOT generate links.
-- DO NOT mention websites.
-- Keep answers short and simple.
-- Maximum 5 lines.
-
-If answer is not found, say:
-"This topic is not available in the notes."
+- Use ONLY given context
+- If context is irrelevant, say you don't know
+- Do NOT repeat previous answers
+- Keep answer max 5 lines
 
 CONTEXT:
 {context}
@@ -255,68 +258,40 @@ QUESTION:
 {user_input}
 """
 
-    # AI RESPONSE
-    with st.spinner("Thinking..."):
+        with st.spinner("🧠 Thinking..."):
 
-        completion = client.chat.completions.create(
+            completion = client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=[{"role": "user", "content": prompt}]
+            )
 
-            model="llama-3.1-8b-instant",
+            answer = completion.choices[0].message.content
 
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
-        )
+        st.chat_message("assistant").markdown(answer)
+        st.session_state.chat_history.append(("assistant", answer))
 
-        answer = completion.choices[0].message.content
+        # -------------------------
+        # TEXT TO SPEECH
+        # -------------------------
+        try:
+            tts = gTTS(answer)
 
-    # SHOW RESPONSE
-    st.chat_message("assistant").markdown(answer)
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
+                audio_path = fp.name
 
-    st.session_state.chat_history.append(
-        ("assistant", answer)
-    )
+            tts.save(audio_path)
+
+            with open(audio_path, "rb") as audio_file:
+                st.audio(audio_file.read(), format="audio/mp3", autoplay=True)
+
+        except Exception as e:
+            st.error(f"Voice output error: {e}")
 
     # -----------------------------
-    # TEXT TO SPEECH
+    # CHAT HISTORY
     # -----------------------------
+    st.markdown("---")
 
-    try:
-
-        tts = gTTS(answer)
-
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
-
-            audio_path = fp.name
-
-        tts.save(audio_path)
-
-        audio_file = open(audio_path, "rb")
-
-        audio_bytes = audio_file.read()
-
-        st.audio(
-            audio_bytes,
-            format="audio/mp3",
-            autoplay=True
-        )
-
-    except Exception as e:
-
-        st.error(f"Voice output error: {e}")
-
-# -----------------------------
-# DISPLAY CHAT HISTORY
-# -----------------------------
-
-st.divider()
-
-st.subheader("💬 Chat History")
-
-for role, message in st.session_state.chat_history:
-
-    with st.chat_message(role):
-
-        st.markdown(message)
+    for role, message in st.session_state.chat_history:
+        with st.chat_message(role):
+            st.markdown(message)
